@@ -1,0 +1,28 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="center-content">
+    <h1>Generate Your Playlist</h1>
+    <div class="search-box">
+        <input type="text" id="artist-search" placeholder="Search for an artist...">
+        <div id="search-results"></div>
+    </div>
+    <div class="selected-artists">
+        <h2>Selected Artists:</h2>
+        <ul id="selected-artists-list"></ul>
+    </div>
+    <div class="options">
+        <label for="playlist-length">Number of Tracks:</label>
+        <input type="number" id="playlist-length" min="1" max="100" value="20">
+    </div>
+    <button id="generate-playlist" class="btn">Generate Playlist</button>
+    <div id="playlist-result" style="display:none;">
+        <h2>Your Playlist is Ready!</h2>
+        <a id="playlist-link" href="#" target="_blank" class="btn">Open Playlist in Spotify</a>
+        <h3>Playlist Tracks:</h3>
+        <div id="playlist-tracks"></div>
+    </div>
+    <a href="{{ url_for('logout') }}" class="btn secondary-btn">Log Out</a>
+</div>
+{% endblock %}
