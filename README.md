@@ -10,9 +10,6 @@ A web application that helps you generate personalized Spotify playlists based o
 - Generate playlists with customizable length
 - View playlist tracks and open the playlist directly in Spotify
 
-## Demo
-
-![Spotify Playlist Generator Demo](static/img/demo.png)
 
 ## Setup
 
