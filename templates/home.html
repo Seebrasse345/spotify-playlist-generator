@@ -11,7 +11,7 @@
                 <p>Create personalized playlists based on your favorite artists</p>
             </div>
             <a href="{{ url_for('login') }}" class="login-button">
-                <i class="fab fa-spotify"></i> Login with Spotify
+                <i class="fas fa-spotify"></i> Login with Spotify
             </a>
             <div class="login-features">
                 <div class="feature">
@@ -41,18 +41,18 @@
             </div>
             <div class="user-info">
                 <h2 id="user-name">Spotify User</h2>
-                <p id="user-email">Spotify User</p>
+                <p id="user-details">Spotify User</p>
                 <div class="user-stats">
                     <div class="stat">
-                        <span id="playlists-count">0</span>
+                        <span id="playlist-count">0</span>
                         <span class="stat-label">Playlists</span>
                     </div>
                     <div class="stat">
-                        <span id="followers-count">0</span>
+                        <span id="following-count">0</span>
                         <span class="stat-label">Following</span>
                     </div>
                     <div class="stat">
-                        <span id="following-count">0</span>
+                        <span id="follower-count">0</span>
                         <span class="stat-label">Followers</span>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
                         <label for="playlist-length">Number of Tracks</label>
                         <div class="track-counter">
                             <button id="decrease-tracks" class="counter-btn">-</button>
-                            <input type="number" id="playlist-length" value="20" min="5" max="50" class="input-field">
+                            <input type="number" id="playlist-length" value="20" min="5" max="50">
                             <button id="increase-tracks" class="counter-btn">+</button>
                         </div>
                     </div>
@@ -95,86 +95,99 @@
                             <input type="text" id="artist-search" placeholder="Search for an artist..." class="input-field">
                             <button id="clear-search" type="button">×</button>
                         </div>
-                        <div class="search-results"></div>
+                        <div class="search-results" id="search-results"></div>
                     </div>
                     <div class="selected-artists-container">
-                        <h3>Selected Artists <span id="artist-count">(0/5)</span></h3>
-                        <div class="selected-artists-list">
+                        <h3>Selected Artists <span id="selected-artists-count">(0/5)</span></h3>
+                        <div id="selected-artists-list" class="selected-artists-list">
                             <div class="no-artists-message">No artists selected yet. Search and select artists above.</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <button id="generate-playlist-btn" class="generate-btn" disabled>Generate Playlist</button>
+            <button id="generate-playlist" class="generate-btn" disabled>
+                <i class="fas fa-magic"></i> Generate Playlist
+            </button>
         </div>
         
         <!-- Content Sections (Right Column) -->
         <div class="content-sections">
             <!-- Top Artists Section -->
-            <div class="main-section top-artists-section">
+            <div class="main-section">
                 <div class="section-header">
                     <h2>Your Top Artists</h2>
-                    <p>Based on your listening habits</p>
+                    <p>Based on your listening history</p>
                 </div>
-                <div class="top-items-grid" id="top-artists-grid">
-                    <!-- Artist cards will be added here -->
-                    <div class="loading-message">Loading your top artists...</div>
+                <div class="time-range-selector">
+                    <button class="time-btn active" data-time-range="medium_term">Last 6 Months</button>
+                    <button class="time-btn" data-time-range="short_term">Last 4 Weeks</button>
+                    <button class="time-btn" data-time-range="long_term">All Time</button>
+                </div>
+                <div id="top-artists-container" class="top-items-grid">
+                    <!-- Artist cards will be generated here via JavaScript -->
+                    <div class="loading-message">
+                        <div class="spinner"></div>
+                        <p>Loading your top artists...</p>
+                    </div>
                 </div>
             </div>
             
             <!-- Top Tracks Section -->
-            <div class="main-section top-tracks-section">
+            <div class="main-section">
                 <div class="section-header">
                     <h2>Your Top Tracks</h2>
-                    <p>Songs you've been loving recently</p>
+                    <p>Songs you've been enjoying</p>
                 </div>
-                <div class="top-items-grid" id="top-tracks-grid">
-                    <!-- Track cards will be added here -->
-                    <div class="loading-message">Loading your top tracks...</div>
+                <div id="top-tracks-container" class="tracks-list">
+                    <!-- Track items will be generated here via JavaScript -->
+                    <div class="loading-message">
+                        <div class="spinner"></div>
+                        <p>Loading your top tracks...</p>
+                    </div>
                 </div>
             </div>
         </div>
         
         <!-- Results Section (Full Width) -->
-        <div class="main-section playlist-results-section">
+        <div id="playlist-results-section" class="main-section playlist-results-section">
             <div class="playlist-results-header">
                 <div class="playlist-info">
                     <div class="playlist-cover">
-                        <img id="playlist-cover" src="https://developer.spotify.com/assets/branding-guidelines/icon1@2x.png" alt="Playlist Cover">
+                        <img id="playlist-image" src="https://i.scdn.co/image/ab67706f000000036e1034747c234a3175e08ab3" alt="Playlist Cover">
                     </div>
                     <div class="playlist-details">
-                        <h3 id="result-playlist-name">Your New Playlist</h3>
-                        <p id="result-playlist-description">Custom playlist based on your selected artists</p>
+                        <h3 id="playlist-title">Your Generated Playlist</h3>
+                        <p id="playlist-creator">Based on your selected artists</p>
                         <div class="playlist-stats">
                             <div class="playlist-stat">
                                 <i class="fas fa-music"></i>
-                                <span id="track-count-display">0 tracks</span>
+                                <span><span id="tracks-count">0</span> tracks</span>
                             </div>
                             <div class="playlist-stat">
                                 <i class="fas fa-clock"></i>
-                                <span id="playlist-duration">0 min</span>
+                                <span>Approx. <span id="total-duration">0</span> minutes</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="playlist-actions">
-                    <a id="open-spotify-btn" href="#" target="_blank" class="playlist-action-btn open-spotify-btn">
+                    <a id="playlist-link" href="#" target="_blank" class="playlist-action-btn open-spotify-btn">
                         <i class="fab fa-spotify"></i> Open in Spotify
                     </a>
-                    <button id="create-new-btn" class="playlist-action-btn create-new-btn">
+                    <button id="create-new" class="playlist-action-btn create-new-btn">
                         <i class="fas fa-plus"></i> Create Another
                     </button>
                 </div>
             </div>
             <div class="tracks-container">
                 <div class="tracks-header">
-                    <div class="header-track-number">#</div>
-                    <div class="header-track-info">Title</div>
-                    <div class="header-track-album">Album</div>
-                    <div class="header-track-duration">Duration</div>
+                    <div>#</div>
+                    <div>Title</div>
+                    <div>Album</div>
+                    <div>Duration</div>
                 </div>
-                <div class="tracks-list" id="tracks-list">
-                    <!-- Track items will be added here -->
+                <div id="playlist-tracks" class="tracks-list">
+                    <!-- Tracks will be generated here via JavaScript -->
                 </div>
             </div>
         </div>
@@ -189,385 +202,16 @@
     </div>
 </div>
 
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if logged in by trying to fetch user profile
-    fetch('/user_profile')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Not logged in');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // User is logged in, show main content
-            document.getElementById('login-section').classList.remove('active');
-            document.getElementById('main-content').classList.add('active');
-            
-            // Update user profile
-            updateUserProfile(data);
-            
-            // Load top artists and tracks
-            loadTopArtists();
-            loadTopTracks();
-            
-            // Initialize playlist generator
-            initPlaylistGenerator();
-        })
-        .catch(error => {
-            console.log('User not logged in or error fetching profile:', error);
-            // Keep login section visible
-        });
-});
+<!-- Alert Container -->
+<div id="alert-container"></div>
+{% endblock %}
 
-function updateUserProfile(userData) {
-    document.getElementById('user-name').textContent = userData.display_name || 'Unknown User';
-    document.getElementById('user-email').textContent = userData.email || '';
-    document.getElementById('playlists-count').textContent = userData.playlists_count || '0';
-    document.getElementById('followers-count').textContent = userData.followers.total || '0';
-    
-    if (userData.images && userData.images.length > 0) {
-        document.getElementById('user-avatar').src = userData.images[0].url;
-    }
-}
+{% block head %}
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-function loadTopArtists() {
-    fetch('/top_artists?limit=9')
-        .then(response => response.json())
-        .then(data => {
-            const artistsGrid = document.getElementById('top-artists-grid');
-            artistsGrid.innerHTML = ''; // Clear loading message
-            
-            data.items.forEach(artist => {
-                const artistCard = createGridItem(
-                    artist.name,
-                    artist.genres && artist.genres.length > 0 ? artist.genres[0] : 'Artist',
-                    artist.images && artist.images.length > 0 ? artist.images[0].url : '{{ url_for("static", filename="img/default_artist.jpg") }}'
-                );
-                artistsGrid.appendChild(artistCard);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading top artists:', error);
-            document.getElementById('top-artists-grid').innerHTML = '<div class="error-message">Failed to load top artists</div>';
-        });
-}
-
-function loadTopTracks() {
-    fetch('/top_tracks?limit=9')
-        .then(response => response.json())
-        .then(data => {
-            const tracksGrid = document.getElementById('top-tracks-grid');
-            tracksGrid.innerHTML = ''; // Clear loading message
-            
-            data.items.forEach(track => {
-                const trackCard = createGridItem(
-                    track.name,
-                    track.artists[0].name,
-                    track.album.images && track.album.images.length > 0 ? track.album.images[0].url : '{{ url_for("static", filename="img/default_track.jpg") }}'
-                );
-                tracksGrid.appendChild(trackCard);
-            });
-        })
-        .catch(error => {
-            console.error('Error loading top tracks:', error);
-            document.getElementById('top-tracks-grid').innerHTML = '<div class="error-message">Failed to load top tracks</div>';
-        });
-}
-
-function createGridItem(primaryText, secondaryText, imageUrl) {
-    const item = document.createElement('div');
-    item.className = 'grid-item hover-lift';
-    
-    item.innerHTML = `
-        <img src="${imageUrl}" class="grid-item-image" alt="${primaryText}">
-        <div class="grid-item-info">
-            <div class="grid-item-name">${primaryText}</div>
-            <div class="grid-item-secondary">${secondaryText}</div>
-        </div>
-    `;
-    
-    return item;
-}
-
-function initPlaylistGenerator() {
-    const artistSearch = document.getElementById('artist-search');
-    const searchResults = document.querySelector('.search-results');
-    const selectedArtistsList = document.querySelector('.selected-artists-list');
-    const noArtistsMessage = document.querySelector('.no-artists-message');
-    const generateBtn = document.getElementById('generate-playlist-btn');
-    const clearSearchBtn = document.getElementById('clear-search');
-    const artistCountDisplay = document.getElementById('artist-count');
-    
-    let selectedArtists = [];
-    let searchTimeout;
-    
-    // Artist search
-    artistSearch.addEventListener('input', function() {
-        const query = this.value.trim();
-        clearSearchBtn.style.display = query ? 'block' : 'none';
-        
-        clearTimeout(searchTimeout);
-        if (query.length < 2) {
-            searchResults.style.display = 'none';
-            return;
-        }
-        
-        searchTimeout = setTimeout(() => {
-            fetch(`/search_artist?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    searchResults.innerHTML = '';
-                    if (data.length === 0) {
-                        searchResults.innerHTML = '<div class="no-results">No artists found</div>';
-                    } else {
-                        data.forEach(artist => {
-                            // Skip if already selected
-                            if (selectedArtists.some(a => a.id === artist.id)) {
-                                return;
-                            }
-                            
-                            const resultItem = document.createElement('div');
-                            resultItem.className = 'search-result-item';
-                            
-                            const imageUrl = artist.images && artist.images.length > 0 
-                                ? artist.images[artist.images.length - 1].url 
-                                : '{{ url_for("static", filename="img/default_artist.jpg") }}';
-                                
-                            resultItem.innerHTML = `
-                                <div class="search-result-image">
-                                    <img src="${imageUrl}" alt="${artist.name}">
-                                </div>
-                                <div class="search-result-info">
-                                    <div class="search-result-name">${artist.name}</div>
-                                    <div class="search-result-followers">${formatNumber(artist.followers.total)} followers</div>
-                                </div>
-                            `;
-                            
-                            resultItem.addEventListener('click', () => {
-                                if (selectedArtists.length >= 5) {
-                                    alert('You can select up to 5 artists');
-                                    return;
-                                }
-                                
-                                selectedArtists.push(artist);
-                                updateSelectedArtists();
-                                artistSearch.value = '';
-                                searchResults.style.display = 'none';
-                                clearSearchBtn.style.display = 'none';
-                            });
-                            
-                            searchResults.appendChild(resultItem);
-                        });
-                    }
-                    
-                    searchResults.style.display = 'block';
-                })
-                .catch(error => {
-                    console.error('Error searching for artists:', error);
-                    searchResults.innerHTML = '<div class="error-message">Error searching for artists</div>';
-                    searchResults.style.display = 'block';
-                });
-        }, 300);
-    });
-    
-    // Clear search
-    clearSearchBtn.addEventListener('click', () => {
-        artistSearch.value = '';
-        searchResults.style.display = 'none';
-        clearSearchBtn.style.display = 'none';
-    });
-    
-    // Click outside search results to close
-    document.addEventListener('click', function(event) {
-        if (!searchResults.contains(event.target) && event.target !== artistSearch) {
-            searchResults.style.display = 'none';
-        }
-    });
-    
-    // Helper to format follower numbers
-    function formatNumber(num) {
-        if (num >= 1000000) {
-            return (num / 1000000).toFixed(1) + 'M';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'K';
-        }
-        return num;
-    }
-    
-    // Update selected artists display
-    function updateSelectedArtists() {
-        if (selectedArtists.length === 0) {
-            noArtistsMessage.style.display = 'block';
-            selectedArtistsList.innerHTML = '';
-            selectedArtistsList.appendChild(noArtistsMessage);
-            generateBtn.disabled = true;
-        } else {
-            noArtistsMessage.style.display = 'none';
-            selectedArtistsList.innerHTML = '';
-            
-            selectedArtists.forEach((artist, index) => {
-                const artistEl = document.createElement('div');
-                artistEl.className = 'selected-artist';
-                
-                const imageUrl = artist.images && artist.images.length > 0 
-                    ? artist.images[artist.images.length - 1].url 
-                    : '{{ url_for("static", filename="img/default_artist.jpg") }}';
-                
-                artistEl.innerHTML = `
-                    <div class="selected-artist-image">
-                        <img src="${imageUrl}" alt="${artist.name}">
-                    </div>
-                    <div class="selected-artist-name">${artist.name}</div>
-                    <button class="remove-artist" data-index="${index}">×</button>
-                `;
-                
-                selectedArtistsList.appendChild(artistEl);
-            });
-            
-            // Add remove event listeners
-            document.querySelectorAll('.remove-artist').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    selectedArtists.splice(index, 1);
-                    updateSelectedArtists();
-                });
-            });
-            
-            generateBtn.disabled = false;
-        }
-        
-        artistCountDisplay.textContent = `(${selectedArtists.length}/5)`;
-    }
-    
-    // Track counter buttons
-    document.getElementById('increase-tracks').addEventListener('click', function() {
-        const input = document.getElementById('playlist-length');
-        const value = parseInt(input.value) || 20;
-        input.value = Math.min(value + 5, 50);
-    });
-    
-    document.getElementById('decrease-tracks').addEventListener('click', function() {
-        const input = document.getElementById('playlist-length');
-        const value = parseInt(input.value) || 20;
-        input.value = Math.max(value - 5, 5);
-    });
-    
-    // Generate playlist
-    generateBtn.addEventListener('click', function() {
-        if (selectedArtists.length === 0) {
-            alert('Please select at least one artist');
-            return;
-        }
-        
-        const playlistName = document.getElementById('playlist-name').value.trim() || 'My Custom Playlist';
-        const playlistDesc = document.getElementById('playlist-description').value.trim() || 'Generated with Spotify Playlist Generator';
-        const trackCount = parseInt(document.getElementById('playlist-length').value) || 20;
-        
-        // Show loading overlay
-        document.getElementById('loading-overlay').classList.add('active');
-        document.getElementById('loading-message').textContent = 'Creating your playlist...';
-        
-        // Prepare data
-        const artistIds = selectedArtists.map(artist => artist.id);
-        
-        // Make request
-        fetch('/generate_playlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                artist_ids: artistIds,
-                playlist_name: playlistName,
-                playlist_description: playlistDesc,
-                track_count: trackCount
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Hide loading overlay
-            document.getElementById('loading-overlay').classList.remove('active');
-            
-            // Update results section
-            document.getElementById('result-playlist-name').textContent = playlistName;
-            document.getElementById('result-playlist-description').textContent = playlistDesc;
-            document.getElementById('track-count-display').textContent = `${data.tracks.length} tracks`;
-            
-            // Calculate total duration
-            const totalDurationMs = data.tracks.reduce((acc, track) => acc + track.duration_ms, 0);
-            const minutes = Math.floor(totalDurationMs / 60000);
-            document.getElementById('playlist-duration').textContent = `${minutes} min`;
-            
-            // Set Spotify button link
-            document.getElementById('open-spotify-btn').href = data.playlist_url;
-            
-            // Populate tracks list
-            const tracksList = document.getElementById('tracks-list');
-            tracksList.innerHTML = '';
-            
-            data.tracks.forEach((track, index) => {
-                const trackItem = document.createElement('div');
-                trackItem.className = 'track-item';
-                
-                const albumImg = track.album.images && track.album.images.length > 0 
-                    ? track.album.images[track.album.images.length - 1].url 
-                    : '{{ url_for("static", filename="img/default_track.jpg") }}';
-                    
-                const artists = track.artists.map(a => a.name).join(', ');
-                const duration = formatDuration(track.duration_ms);
-                
-                trackItem.innerHTML = `
-                    <div class="track-number">${index + 1}</div>
-                    <div class="track-info">
-                        <div class="track-image">
-                            <img src="${albumImg}" alt="${track.name}">
-                        </div>
-                        <div class="track-name-artist">
-                            <div class="track-name">${track.name}</div>
-                            <div class="track-artist">${artists}</div>
-                        </div>
-                    </div>
-                    <div class="track-album">${track.album.name}</div>
-                    <div class="track-duration">${duration}</div>
-                `;
-                
-                tracksList.appendChild(trackItem);
-            });
-            
-            // Show results section
-            document.querySelector('.playlist-results-section').style.display = 'block';
-            document.querySelector('.playlist-results-section').scrollIntoView({ behavior: 'smooth' });
-        })
-        .catch(error => {
-            console.error('Error generating playlist:', error);
-            document.getElementById('loading-overlay').classList.remove('active');
-            alert('There was an error generating your playlist. Please try again.');
-        });
-    });
-    
-    // Format track duration
-    function formatDuration(ms) {
-        const minutes = Math.floor(ms / 60000);
-        const seconds = Math.floor((ms % 60000) / 1000);
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    }
-    
-    // Create New button
-    document.getElementById('create-new-btn').addEventListener('click', function() {
-        // Reset form and hide results
-        document.getElementById('playlist-name').value = '';
-        document.getElementById('playlist-description').value = '';
-        document.getElementById('playlist-length').value = '20';
-        selectedArtists = [];
-        updateSelectedArtists();
-        document.querySelector('.playlist-results-section').style.display = 'none';
-        
-        // Scroll to form
-        document.querySelector('.playlist-generator-section').scrollIntoView({ behavior: 'smooth' });
-    });
-}
-</script>
-{% endblock scripts %}
-{% endblock content %}
+<!-- Google Fonts - Montserrat -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}

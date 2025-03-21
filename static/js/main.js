@@ -69,14 +69,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (decreaseBtn && increaseBtn && playlistLengthInput) {
             decreaseBtn.addEventListener('click', () => {
                 const currentValue = parseInt(playlistLengthInput.value);
-                if (currentValue > parseInt(playlistLengthInput.min)) {
+                if (currentValue > parseInt(playlistLengthInput.min || 5)) {
                     playlistLengthInput.value = currentValue - 1;
                 }
             });
             
             increaseBtn.addEventListener('click', () => {
                 const currentValue = parseInt(playlistLengthInput.value);
-                if (currentValue < parseInt(playlistLengthInput.max)) {
+                if (currentValue < parseInt(playlistLengthInput.max || 50)) {
                     playlistLengthInput.value = currentValue + 1;
                 }
             });
@@ -86,6 +86,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const generateBtn = document.getElementById('generate-playlist');
         if (generateBtn) {
             generateBtn.addEventListener('click', handlePlaylistGeneration);
+        }
+        
+        // Create new button in results section
+        const createNewBtn = document.getElementById('create-new');
+        if (createNewBtn) {
+            createNewBtn.addEventListener('click', () => {
+                // Reset form and hide results
+                document.getElementById('playlist-name').value = '';
+                document.getElementById('playlist-description').value = '';
+                document.getElementById('playlist-length').value = '20';
+                selectedArtists.clear();
+                updateSelectedArtistsUI();
+                document.getElementById('playlist-results-section').style.display = 'none';
+                
+                // Scroll to playlist generator section
+                document.querySelector('.playlist-generator-section').scrollIntoView({ behavior: 'smooth' });
+            });
         }
     }
     
@@ -159,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         
-        fetch(`/top_artists?time_range=${timeRange}&limit=10`)
+        fetch(`/top_artists?time_range=${timeRange}&limit=8`)
             .then(response => response.json())
             .then(data => {
                 displayTopArtists(data);
@@ -192,14 +209,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const followers = new Intl.NumberFormat().format(artist.followers.total);
             
             artistsHTML += `
-                <div class="artist-card" data-artist-id="${artist.id}">
+                <div class="grid-item" data-artist-id="${artist.id}">
                     <div class="artist-rank">${index + 1}</div>
-                    <div class="artist-image">
-                        <img src="${imageUrl}" alt="${artist.name}">
-                    </div>
-                    <div class="artist-info">
-                        <div class="artist-name">${artist.name}</div>
-                        <div class="artist-followers">${followers} followers</div>
+                    <img src="${imageUrl}" alt="${artist.name}" class="grid-item-image">
+                    <div class="grid-item-info">
+                        <div class="grid-item-name">${artist.name}</div>
+                        <div class="grid-item-secondary">${followers} followers</div>
                     </div>
                 </div>
             `;
@@ -208,12 +223,12 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = artistsHTML;
         
         // Add click event to artist cards for selection
-        const artistCards = container.querySelectorAll('.artist-card');
+        const artistCards = container.querySelectorAll('.grid-item');
         artistCards.forEach(card => {
             card.addEventListener('click', () => {
                 const artistId = card.getAttribute('data-artist-id');
-                const artistName = card.querySelector('.artist-name').textContent;
-                const artistImage = card.querySelector('.artist-image img').src;
+                const artistName = card.querySelector('.grid-item-name').textContent;
+                const artistImage = card.querySelector('.grid-item-image').src;
                 
                 addArtistToSelection({
                     id: artistId,
@@ -275,17 +290,17 @@ document.addEventListener('DOMContentLoaded', function() {
             tracksHTML += `
                 <div class="track-item">
                     <span class="track-number">${index + 1}</span>
-                    <div class="track-image">
-                        <img src="${imageUrl}" alt="${track.name}">
-                    </div>
                     <div class="track-info">
-                        <div class="track-name">${track.name}</div>
-                        <div class="track-artist">${artistNames}</div>
+                        <div class="track-image">
+                            <img src="${imageUrl}" alt="${track.name}">
+                        </div>
+                        <div class="track-name-artist">
+                            <div class="track-name">${track.name}</div>
+                            <div class="track-artist">${artistNames}</div>
+                        </div>
                     </div>
-                    <div class="track-details">
-                        <div class="track-album">${track.album.name}</div>
-                        <div class="track-duration">${trackDuration}</div>
-                    </div>
+                    <div class="track-album">${track.album.name}</div>
+                    <div class="track-duration">${trackDuration}</div>
                 </div>
             `;
         });
@@ -500,16 +515,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('selected-artists-list');
         if (!container) return;
         
-        // Clear container
-        container.innerHTML = '';
-        
         // Update counter
         const counter = document.getElementById('selected-artists-count');
         if (counter) {
-            counter.textContent = `${selectedArtists.size}/5`;
+            counter.textContent = `(${selectedArtists.size}/5)`;
         }
         
+        // If no artists selected
+        if (selectedArtists.size === 0) {
+            container.innerHTML = `<div class="no-artists-message">No artists selected yet. Search and select artists above.</div>`;
+            
+            // Update generate button state
+            const generateButton = document.getElementById('generate-playlist');
+            if (generateButton) {
+                generateButton.disabled = true;
+            }
+            return;
+        }
+        
+        // Clear container
+        container.innerHTML = '';
+        
         // Add each artist
+        let index = 0;
         for (const [id, artist] of selectedArtists) {
             const imageUrl = artist.images && artist.images.length > 0 
                 ? artist.images[0].url 
@@ -524,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <img src="${imageUrl}" alt="${artist.name}">
                 </div>
                 <div class="selected-artist-name">${artist.name}</div>
-                <button class="remove-artist" aria-label="Remove ${artist.name}">×</button>
+                <button class="remove-artist" data-index="${index}" aria-label="Remove ${artist.name}">×</button>
             `;
             
             // Add event listener to remove button
@@ -535,12 +563,13 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             container.appendChild(artistElement);
+            index++;
         }
         
         // Update generate button state
         const generateButton = document.getElementById('generate-playlist');
         if (generateButton) {
-            generateButton.disabled = selectedArtists.size === 0;
+            generateButton.disabled = false;
         }
     }
     
@@ -574,6 +603,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const loadingOverlay = document.getElementById('loading-overlay');
         if (loadingOverlay) {
             loadingOverlay.classList.add('active');
+            document.getElementById('loading-message').textContent = 'Creating your custom playlist...';
         }
         
         // Disable generate button
@@ -697,17 +727,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const duration = formatDuration(track.duration_ms);
             
             tracksHTML += `
-                <div class="playlist-track" data-track-index="${index}">
-                    <span class="playlist-track-number">${trackNumber}</span>
-                    <div class="playlist-track-image">
-                        <img src="${imageUrl}" alt="${track.name}">
+                <div class="track-item" data-track-index="${index}">
+                    <span class="track-number">${trackNumber}</span>
+                    <div class="track-info">
+                        <div class="track-image">
+                            <img src="${imageUrl}" alt="${track.name}">
+                        </div>
+                        <div class="track-name-artist">
+                            <div class="track-name">${track.name}</div>
+                            <div class="track-artist">${artistNames}</div>
+                        </div>
                     </div>
-                    <div class="playlist-track-info">
-                        <div class="playlist-track-name">${track.name}</div>
-                        <div class="playlist-track-artist">${artistNames}</div>
-                    </div>
-                    <div class="playlist-track-album">${track.album.name}</div>
-                    <div class="playlist-track-duration">${duration}</div>
+                    <div class="track-album">${track.album.name}</div>
+                    <div class="track-duration">${duration}</div>
                 </div>
             `;
         });
@@ -715,7 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
         playlistTracks.innerHTML = tracksHTML;
         
         // Add animation for tracks appearing
-        const trackElements = playlistTracks.querySelectorAll('.playlist-track');
+        const trackElements = playlistTracks.querySelectorAll('.track-item');
         trackElements.forEach((track, index) => {
             setTimeout(() => {
                 track.classList.add('visible');
@@ -734,7 +766,7 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * Show an alert message
      */
-    function showAlert(message) {
+    function showAlert(message, type = 'info') {
         const alertContainer = document.getElementById('alert-container');
         
         if (!alertContainer) {
@@ -743,12 +775,12 @@ document.addEventListener('DOMContentLoaded', function() {
             newAlertContainer.id = 'alert-container';
             document.body.appendChild(newAlertContainer);
             
-            showAlert(message); // Recursive call now that container exists
+            showAlert(message, type); // Recursive call now that container exists
             return;
         }
         
         const alertElement = document.createElement('div');
-        alertElement.className = 'alert';
+        alertElement.className = `alert ${type}`;
         alertElement.textContent = message;
         
         alertContainer.appendChild(alertElement);
