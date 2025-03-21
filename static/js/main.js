@@ -206,16 +206,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 ? artist.images[0].url 
                 : 'https://developer.spotify.com/assets/branding-guidelines/icon1@2x.png';
             
-            const followers = new Intl.NumberFormat().format(artist.followers.total);
-            
             artistsHTML += `
-                <div class="grid-item" data-artist-id="${artist.id}">
+                <div class="grid-item" data-artist-id="${artist.id}" title="${artist.name}">
                     <div class="artist-rank">${index + 1}</div>
                     <img src="${imageUrl}" alt="${artist.name}" class="grid-item-image">
-                    <div class="grid-item-info">
-                        <div class="grid-item-name">${artist.name}</div>
-                        <div class="grid-item-secondary">${followers} followers</div>
-                    </div>
                 </div>
             `;
         });
@@ -227,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
         artistCards.forEach(card => {
             card.addEventListener('click', () => {
                 const artistId = card.getAttribute('data-artist-id');
-                const artistName = card.querySelector('.grid-item-name').textContent;
+                const artistName = card.getAttribute('title');
                 const artistImage = card.querySelector('.grid-item-image').src;
                 
                 addArtistToSelection({
