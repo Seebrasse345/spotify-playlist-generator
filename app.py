@@ -20,8 +20,8 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 Session(app)
 
 # Spotify OAuth config
-CLIENT_ID = "21a970010b0142e49f00dcf71daa3f2a"
-CLIENT_SECRET = "aef8175d766e4029a379ebd077ca9de9"
+CLIENT_ID = 
+CLIENT_SECRET = 
 REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI', 'http://localhost:5000/callback')
 SCOPE = 'playlist-modify-private,user-library-read,user-top-read,user-read-private,user-read-email'
 
